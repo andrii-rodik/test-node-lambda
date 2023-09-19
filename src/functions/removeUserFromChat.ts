@@ -1,44 +1,25 @@
 import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
 import { middyfy } from '@libs/lambda';
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import {DeleteCommand, DynamoDBDocumentClient, QueryCommand} from "@aws-sdk/lib-dynamodb";
 import {formatJSONResponse} from "@libs/api-gateway";
 import {UserInChat} from "../models/UserInChat";
+import {UserRepository} from "../repositories/UserRepository";
+import {UserInChatRepository} from "../repositories/UserInChatRepository";
 
 const schema = UserInChat.getSchema();
 
 const removeUserFromChat: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
-
-  const client = new DynamoDBClient();
-  const docClient = DynamoDBDocumentClient.from(client);
+  const userRepository = new UserRepository();
+  const userInChatRepository = new UserInChatRepository();
 
   const eventData = event.body;
 
-  const findResponse = await docClient.send(new QueryCommand({
-    TableName: "tb1",
-    KeyConditionExpression:
-        "test_partition_key = :userid",
-    ExpressionAttributeValues: {
-      ":userid": `USER#${eventData.userId}`,
-    },
-    ConsistentRead: true,
-  }));
+  const user = await userRepository.findOne(eventData.userId);
 
-  const user = findResponse.Items;
-
-  if (user.length === 0) {
+  if (!user) {
     throw new Error('user was not found');
   }
 
-  const command = new DeleteCommand({
-    TableName: "tb1",
-    Key: {
-      test_partition_key: `USER#${eventData.userId}`,
-      test_sort_key: `CHAT#${eventData.chatId}`,
-    },
-  });
-
-  const response = await docClient.send(command);
+  const response = await userInChatRepository.remove(eventData.userId, eventData.chatId);
 
   return formatJSONResponse(response);
 };

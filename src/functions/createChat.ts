@@ -7,6 +7,7 @@ import {ChatRepository} from "../repositories/ChatRepository";
 const schema = Chat.getSchema();
 
 const createChat: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
+
   const repository = new ChatRepository();
 
   const response = await repository.create(event.body);

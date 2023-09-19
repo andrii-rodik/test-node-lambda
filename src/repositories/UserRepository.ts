@@ -1,12 +1,11 @@
 import {User} from "../models/User";
 import {IRepository} from "./IRepository";
-import {DynamoDBClient} from "@aws-sdk/client-dynamodb";
-import {DynamoDBDocumentClient, PutCommand, QueryCommand, ScanCommand} from "@aws-sdk/lib-dynamodb";
+import {PutCommand, QueryCommand, ScanCommand} from "@aws-sdk/lib-dynamodb";
+import {getDocClient} from "../db/client";
 
 export class UserRepository implements IRepository<User>{
     public async findAll(): Promise<User[]> {
-        const client = new DynamoDBClient();
-        const docClient = DynamoDBDocumentClient.from(client);
+        const docClient = getDocClient();
 
         const command = new ScanCommand({
             ProjectionExpression: "test_partition_key, test_sort_key, email, firstName, lastName, age",
@@ -15,7 +14,7 @@ export class UserRepository implements IRepository<User>{
                 ":type": User.getDynamoDbType(),
             },
             ExpressionAttributeNames: { '#entityType': 'type' },
-            TableName: "tb1",
+            TableName: process.env.TABLE_NAME,
         });
 
         const response = await docClient.send(command);
@@ -24,19 +23,18 @@ export class UserRepository implements IRepository<User>{
             return null;
         }
 
-        return response.Items as User[];
+        return response.Items.map((i) => this.mapDynamoEntityToClass(i));
     }
 
     public async create(obj: any): Promise<any> {
-        const client = new DynamoDBClient();
-        const docClient = DynamoDBDocumentClient.from(client);
+        const docClient = getDocClient();
 
         const timestamp = new Date().getTime();
 
         const user = new User(timestamp, obj.firstName, obj.lastName, obj.email, obj.age);
 
         const command = new PutCommand({
-            TableName: "tb1",
+            TableName: process.env.TABLE_NAME,
             Item: user.toItem(),
         });
 
@@ -46,12 +44,11 @@ export class UserRepository implements IRepository<User>{
     }
 
     public async findOne(id: number): Promise<User> {
-        const client = new DynamoDBClient();
-        const docClient = DynamoDBDocumentClient.from(client);
+        const docClient = getDocClient();
 
         const command = new QueryCommand({
             ProjectionExpression: "test_partition_key, test_sort_key, email, firstName, lastName, age",
-            TableName: "tb1",
+            TableName: process.env.TABLE_NAME,
             KeyConditionExpression:
                 "test_partition_key = :userid AND test_sort_key = :userid",
             ExpressionAttributeValues: {
@@ -66,7 +63,13 @@ export class UserRepository implements IRepository<User>{
             return null;
         }
 
-        return response.Items[0] as User;
+        return this.mapDynamoEntityToClass(response.Items[0]);
+    }
+
+    private mapDynamoEntityToClass(entity: any): User {
+        const id = Number(entity.test_sort_key.split('#')[1]);
+
+        return new User(id, entity.firstName, entity.lastName, entity.email, entity.age);
     }
 
 }

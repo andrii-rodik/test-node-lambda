@@ -1,10 +1,10 @@
 import {BaseEntity} from "./BaseEntity";
 
 export class UserInChat extends BaseEntity {
-    public userId: string;
-    public chatId: string;
+    public userId: number;
+    public chatId: number;
     public connectionDate: string;
-    constructor(userId: string, chatId: string, connectionDate: string) {
+    constructor(userId: number, chatId: number, connectionDate: string) {
         super();
         this.userId = userId;
         this.chatId = chatId;
@@ -30,8 +30,8 @@ export class UserInChat extends BaseEntity {
         return {
             type: "object",
             properties: {
-                chatId: { type: 'string' },
-                userId: { type: 'string' },
+                chatId: { type: 'number' },
+                userId: { type: 'number' },
             },
             required: ['chatId', 'userId']
         } as const;

@@ -1,29 +1,25 @@
 import { formatJSONResponse } from '@libs/api-gateway';
 import { middyfy } from '@libs/lambda';
-import {DynamoDBDocumentClient, QueryCommand} from "@aws-sdk/lib-dynamodb";
-import {DynamoDBClient} from "@aws-sdk/client-dynamodb";
+import {UserInChatRepository} from "../repositories/UserInChatRepository";
+import {User} from "../models/User";
+import {UserRepository} from "../repositories/UserRepository";
 
 const getUsersInChat = async (event) => {
-    const client = new DynamoDBClient({});
-    const docClient = DynamoDBDocumentClient.from(client);
-
+    const repository = new UserInChatRepository();
+    const userRepository = new UserRepository();
     const chatId = event.pathParameters.chatid;
 
-    const command = new QueryCommand({
-        TableName: "tb1",
-        IndexName: "test_sort_key-index",
-        KeyConditionExpression:
-            "test_sort_key = :chatId",
-        ExpressionAttributeValues: {
-            ":chatId": `CHAT#${chatId}`,
-        },
+    const userInChatsEntities = await repository.findAllByChatId(chatId);
+
+    const users: User[] = [];
+    for (const uic of userInChatsEntities) {
+        const user = await userRepository.findOne(uic.userId);
+        users.push(user);
+    }
+
+    return formatJSONResponse({
+        items: users,
     });
-
-    const response = await docClient.send(command);
-
-  return formatJSONResponse({
-    items: response.Items,
-  });
 };
 
 export const main = middyfy(getUsersInChat);
