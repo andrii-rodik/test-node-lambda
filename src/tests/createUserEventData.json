@@ -1,0 +1,93 @@
+{
+  "body": {
+    "firstName": "Candelario",
+    "lastName": "Strosin",
+    "email": "Tom_Grant80@hotmail.com",
+    "job": "Optimization",
+    "age": 21
+  },
+  "headers": {
+    "Content-Type": "application/json",
+    "User-Agent": "PostmanRuntime/7.33.0",
+    "Accept": "*/*",
+    "Cache-Control": "no-cache",
+    "Postman-Token": "86c90e21-5939-483e-b59e-d0f6cfe5108c",
+    "Host": "localhost:3000",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive",
+    "Content-Length": "142"
+  },
+  "httpMethod": "POST",
+  "isBase64Encoded": false,
+  "multiValueHeaders": {
+    "Content-Type": [
+      "application/json"
+    ],
+    "User-Agent": [
+      "PostmanRuntime/7.33.0"
+    ],
+    "Accept": [
+      "*/*"
+    ],
+    "Cache-Control": [
+      "no-cache"
+    ],
+    "Postman-Token": [
+      "86c90e21-5939-483e-b59e-d0f6cfe5108c"
+    ],
+    "Host": [
+      "localhost:3000"
+    ],
+    "Accept-Encoding": [
+      "gzip, deflate, br"
+    ],
+    "Connection": [
+      "keep-alive"
+    ],
+    "Content-Length": [
+      "142"
+    ]
+  },
+  "multiValueQueryStringParameters": null,
+  "path": "/user",
+  "pathParameters": null,
+  "queryStringParameters": null,
+  "requestContext": {
+    "accountId": "offlineContext_accountId",
+    "apiId": "offlineContext_apiId",
+    "authorizer": {
+      "principalId": "offlineContext_authorizer_principalId"
+    },
+    "domainName": "offlineContext_domainName",
+    "domainPrefix": "offlineContext_domainPrefix",
+    "extendedRequestId": "91ee8c25-019f-4204-a8d8-add5404f2003",
+    "httpMethod": "POST",
+    "identity": {
+      "accessKey": null,
+      "accountId": "offlineContext_accountId",
+      "apiKey": "offlineContext_apiKey",
+      "apiKeyId": "offlineContext_apiKeyId",
+      "caller": "offlineContext_caller",
+      "cognitoAuthenticationProvider": "offlineContext_cognitoAuthenticationProvider",
+      "cognitoAuthenticationType": "offlineContext_cognitoAuthenticationType",
+      "cognitoIdentityId": "offlineContext_cognitoIdentityId",
+      "cognitoIdentityPoolId": "offlineContext_cognitoIdentityPoolId",
+      "principalOrgId": null,
+      "sourceIp": "::1",
+      "user": "offlineContext_user",
+      "userAgent": "PostmanRuntime/7.33.0",
+      "userArn": "offlineContext_userArn"
+    },
+    "path": "/user",
+    "protocol": "HTTP/1.1",
+    "requestId": "e0facd77-587a-4511-b1c7-27a021bdde8a",
+    "requestTime": "19/Sep/2023:12:03:07 +0300",
+    "requestTimeEpoch": 1695114187028,
+    "resourceId": "offlineContext_resourceId",
+    "resourcePath": "/dev/user",
+    "stage": "dev"
+  },
+  "resource": "/user",
+  "stageVariables": null,
+  "rawBody": "{\n    \"firstName\": \"Candelario\",\n    \"lastName\": \"Strosin\",\n    \"email\": \"Tom_Grant80@hotmail.com\",\n    \"job\": \"Optimization\",\n    \"age\": 21\n}"
+}
