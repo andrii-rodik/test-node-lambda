@@ -11,5 +11,7 @@ export const getDocClient = (): DynamoDBDocumentClient => {
     const client = new DynamoDBClient();
     docClient = DynamoDBDocumentClient.from(client);
 
+    console.log('db connect');
+
     return docClient;
 }

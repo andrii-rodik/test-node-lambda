@@ -1,19 +1,22 @@
+import 'reflect-metadata';
 import { formatJSONResponse } from '@libs/api-gateway';
 import { middyfy } from '@libs/lambda';
-import {ChatRepository} from "../repositories/ChatRepository";
+import { DiContainer } from '../DiContainer';
+import { IChatRepository } from '../repositories/IChatRepository';
 
-const getAllChats = async () => {
-  const repository = new ChatRepository();
+export const getAllChats = async () => {
+	const container = new DiContainer().container;
+	const repository = container.resolve('IChatRepository') as IChatRepository;
 
-  const chats = await repository.findAll();
+	const chats = await repository.findAll();
 
-  if (!chats) {
-    throw new Error('not found');
-  }
+	if (!chats) {
+		throw new Error('not found');
+	}
 
-  return formatJSONResponse({
-    items: chats,
-  });
+	return formatJSONResponse({
+		items: chats,
+	});
 };
 
 export const main = middyfy(getAllChats);

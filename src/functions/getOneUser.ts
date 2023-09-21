@@ -1,20 +1,23 @@
-import { formatJSONResponse } from '@libs/api-gateway';
-import { middyfy } from '@libs/lambda';
-import {UserRepository} from "../repositories/UserRepository";
+import 'reflect-metadata';
+import { formatJSONResponse } from '../libs/api-gateway';
+import { middyfy } from '../libs/lambda';
+import { DiContainer } from '../DiContainer';
+import { IUserRepository } from '../repositories/IUserRepository';
 
-const getOneUser = async (event) => {
-    const repository = new UserRepository();
-    const id = event.pathParameters.id;
+export const getOneUser = async (event) => {
+	const container = new DiContainer().container;
+	const repository = container.resolve('IUserRepository') as IUserRepository;
+	const id = event.pathParameters.id;
 
-    const user = await repository.findOne(id);
+	const user = await repository.findOne(id);
 
-    if (!user) {
-        throw new Error('not found');
-    }
+	if (!user) {
+		throw new Error('not found');
+	}
 
-    return formatJSONResponse({
-        item: user,
-    });
+	return formatJSONResponse({
+		item: user,
+	});
 };
 
 export const main = middyfy(getOneUser);

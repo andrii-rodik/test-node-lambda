@@ -4,9 +4,9 @@ export abstract class BaseEntity {
 
     public keys(): object {
         return {
-            test_partition_key: this.partitionKey,
-            test_sort_key: this.sortKey,
-        }
+    		test_partition_key: this.partitionKey,
+    		test_sort_key: this.sortKey,
+    	};
     }
 
     abstract toItem(): Record<string, unknown>;

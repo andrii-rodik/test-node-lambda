@@ -1,75 +1,80 @@
-import {User} from "../models/User";
-import {IRepository} from "./IRepository";
-import {PutCommand, QueryCommand, ScanCommand} from "@aws-sdk/lib-dynamodb";
-import {getDocClient} from "../db/client";
+import { User } from '../models/User';
+import { PutCommand, QueryCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
+import { getDocClient } from '../db/client';
+import { IUserRepository } from './IUserRepository';
+import { injectable } from 'tsyringe';
 
-export class UserRepository implements IRepository<User>{
-    public async findAll(): Promise<User[]> {
-        const docClient = getDocClient();
+@injectable()
+export class UserRepository implements IUserRepository{
+	public async findAll(): Promise<User[]> {
+		const docClient = getDocClient();
 
-        const command = new ScanCommand({
-            ProjectionExpression: "test_partition_key, test_sort_key, email, firstName, lastName, age",
-            FilterExpression: "#entityType = :type",
-            ExpressionAttributeValues: {
-                ":type": User.getDynamoDbType(),
-            },
-            ExpressionAttributeNames: { '#entityType': 'type' },
-            TableName: process.env.TABLE_NAME,
-        });
+		const command = new ScanCommand({
+			ProjectionExpression: 'test_partition_key, test_sort_key, email, firstName, lastName, age',
+			FilterExpression: '#entityType = :type',
+			ExpressionAttributeValues: {
+				':type': User.getDynamoDbType(),
+			},
+			ExpressionAttributeNames: { '#entityType': 'type' },
+			TableName: process.env.TABLE_NAME,
+		});
 
-        const response = await docClient.send(command);
+		const response = await docClient.send(command);
 
-        if (response.Items.length === 0) {
-            return null;
-        }
+		if (response.Items.length === 0) {
+			return null;
+		}
 
-        return response.Items.map((i) => this.mapDynamoEntityToClass(i));
-    }
+		return response.Items.map((i) => this.mapDynamoEntityToClass(i));
+	}
 
-    public async create(obj: any): Promise<any> {
-        const docClient = getDocClient();
+	public async create(obj: any): Promise<any> {
+		console.log('REAL CREATE');
 
-        const timestamp = new Date().getTime();
 
-        const user = new User(timestamp, obj.firstName, obj.lastName, obj.email, obj.age);
+		const docClient = getDocClient();
 
-        const command = new PutCommand({
-            TableName: process.env.TABLE_NAME,
-            Item: user.toItem(),
-        });
+		const timestamp = new Date().getTime();
 
-        const response = await docClient.send(command);
+		const user = new User(timestamp, obj.firstName, obj.lastName, obj.email, obj.age);
 
-        return response;
-    }
+		const command = new PutCommand({
+			TableName: process.env.TABLE_NAME,
+			Item: user.toItem(),
+		});
 
-    public async findOne(id: number): Promise<User> {
-        const docClient = getDocClient();
+		const response = await docClient.send(command);
 
-        const command = new QueryCommand({
-            ProjectionExpression: "test_partition_key, test_sort_key, email, firstName, lastName, age",
-            TableName: process.env.TABLE_NAME,
-            KeyConditionExpression:
-                "test_partition_key = :userid AND test_sort_key = :userid",
-            ExpressionAttributeValues: {
-                ":userid": `USER#${id}`,
-            },
-            ConsistentRead: true,
-        });
+		return response;
+	}
 
-        const response = await docClient.send(command);
+	public async findOne(id: number): Promise<User> {
+		const docClient = getDocClient();
 
-        if (response.Items.length === 0) {
-            return null;
-        }
+		const command = new QueryCommand({
+			ProjectionExpression: 'test_partition_key, test_sort_key, email, firstName, lastName, age',
+			TableName: process.env.TABLE_NAME,
+			KeyConditionExpression:
+                'test_partition_key = :userid AND test_sort_key = :userid',
+			ExpressionAttributeValues: {
+				':userid': `USER#${id}`,
+			},
+			ConsistentRead: true,
+		});
 
-        return this.mapDynamoEntityToClass(response.Items[0]);
-    }
+		const response = await docClient.send(command);
 
-    private mapDynamoEntityToClass(entity: any): User {
-        const id = Number(entity.test_sort_key.split('#')[1]);
+		if (response.Items.length === 0) {
+			return null;
+		}
 
-        return new User(id, entity.firstName, entity.lastName, entity.email, entity.age);
-    }
+		return this.mapDynamoEntityToClass(response.Items[0]);
+	}
+
+	private mapDynamoEntityToClass(entity: any): User {
+		const id = Number(entity.test_sort_key.split('#')[1]);
+
+		return new User(id, entity.firstName, entity.lastName, entity.email, entity.age);
+	}
 
 }

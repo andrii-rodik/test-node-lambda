@@ -1,22 +1,21 @@
-import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
-import { formatJSONResponse } from '@libs/api-gateway';
-import { middyfy } from '@libs/lambda';
-import {User} from "../models/User";
-import {UserRepository} from "../repositories/UserRepository";
-import * as fs from "fs";
+import 'reflect-metadata';
+import type { ValidatedEventAPIGatewayProxyEvent } from '../libs/api-gateway';
+import { formatJSONResponse } from '../libs/api-gateway';
+import { middyfy } from '../libs/lambda';
+import { User } from '../models/User';
+import { DiContainer } from '../DiContainer';
+import { IUserRepository } from '../repositories/IUserRepository';
 
 const schema = User.getSchema();
 
-const createUser: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
-  const repository = new UserRepository();
+export const createUser: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
+	const container = new DiContainer().container;
+	const repository = container.resolve('IUserRepository') as IUserRepository;
+	const body = event.body;
 
-  fs.appendFile('1.json', JSON.stringify(event), () => {});
+	const response = await repository.create(body);
 
-  const body = event.body;
-
-  const response = await repository.create(body);
-
-  return formatJSONResponse(response);
+	return formatJSONResponse(response);
 };
 
 export const main = middyfy(createUser);
